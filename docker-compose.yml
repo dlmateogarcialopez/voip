@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  voip-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voip_backend_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    # Volúmenes para pruebas de desarrollo local en caliente (Hot Reload)
+    # Permite editar main.py o index.html sin tener que reconstruir la imagen
+    volumes:
+      - ./main.py:/app/main.py:ro
+      - ./index.html:/app/index.html:ro

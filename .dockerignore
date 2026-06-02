@@ -1,0 +1,31 @@
+# Ignorar entornos virtuales locales
+venv/
+.venv/
+env/
+
+# Ignorar archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar control de versiones y configuraciones de IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+.agent/
+.gemini/
+
+# Ignorar secretos (las credenciales deben inyectarse por variables de entorno / docker-compose)
+.env
+.env.*
+
+# Ignorar binarios locales
+ngrok.exe
+
+# Ignorar logs e informes locales
+*.log
+walkthrough.md
+task.md
+implementation_plan.md
