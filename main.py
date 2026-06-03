@@ -1,11 +1,13 @@
 import os
 import urllib.request
+import urllib.parse
 from fastapi import FastAPI, Form, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VoiceGrant
 from twilio.twiml.voice_response import VoiceResponse, Dial
+from twilio.rest import Client as TwilioRestClient
 from dotenv import load_dotenv
 
 # Cargar variables de entorno del archivo .env
@@ -22,15 +24,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Credenciales de Twilio
+# Credenciales y Configuración de Twilio
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_API_KEY = os.getenv("TWILIO_API_KEY")
 TWILIO_API_SECRET = os.getenv("TWILIO_API_SECRET")
 TWILIO_TWIML_APP_SID = os.getenv("TWILIO_TWIML_APP_SID")
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "+16316585381")
+ADVISOR_PHONE_NUMBER = os.getenv("ADVISOR_PHONE_NUMBER", "+573146429388")
 
-# Número celular del Asesor para desvíos PSTN (Leído de .env)
-ADVISOR_PHONE_NUMBER = os.getenv("ADVISOR_PHONE_NUMBER", "+573001234567")
+# Inicializar Cliente REST de Twilio para operaciones salientes (Click-to-Call)
+twilio_client = TwilioRestClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 # Carpeta local para almacenar los audios descargados automáticamente
 RECORDINGS_DIR = os.path.join(os.path.dirname(__file__), "recordings")
@@ -83,47 +87,208 @@ async def get_token(identity: str):
             content={"error": f"Error al generar el token de Twilio: {str(e)}"}
         )
 
-@app.post("/incoming-call")
+@app.api_route("/incoming-call", methods=["GET", "POST"])
 async def incoming_call(request: Request, routing: str = "webrtc"):
     """
-    ENDPOINT DE CONTROL DE FLUJO DINÁMICO:
-    Maneja el enrutamiento de la llamada entrante según el query parameter 'routing'.
-    - Si routing=webrtc (defecto): llama al softphone del navegador.
-    - Si routing=pstn: desvía la llamada al celular configurado en .env (ADVISOR_PHONE_NUMBER).
+    ENDPOINT DE CONTROL DE FLUJO DINÁMICO (TwiML App Webhook):
+    Maneja tanto llamadas entrantes de clientes, como llamadas salientes desde el Navegador (WebRTC).
     """
     try:
-        form_data = await request.form()
-        from_number = form_data.get("From", "Desconocido")
-        print(f"[Incoming Call Webhook] Nueva llamada de: {from_number} | Modo Enrutamiento: {routing}")
+        if request.method == "POST":
+            form_data = await request.form()
+            from_number = form_data.get("From", "Desconocido")
+            to_number = form_data.get("To", "Desconocido")
+        else:
+            from_number = request.query_params.get("From", "Desconocido")
+            to_number = request.query_params.get("To", "Desconocido")
+        
+        print(f"[Incoming Call Webhook] Petición recibida ({request.method}). From: {from_number} | To: {to_number} | Routing: {routing}")
 
         response = VoiceResponse()
-        response.say("Conectando su llamada con un asesor disponible. Esta conversación será grabada.", language="es-MX")
-        
         base_url = str(request.base_url).rstrip('/')
         recording_callback_url = f"{base_url}/recording-status"
-        
-        dial = Dial(
-            record="record-from-answer-dual",
-            recording_status_callback=recording_callback_url,
-            recording_status_callback_event="completed"
-        )
-        
-        if routing.lower() == "pstn":
-            # CASO B: Desviar llamada a celular del asesor
-            dial.number(ADVISOR_PHONE_NUMBER)
-            print(f"[Incoming Call Webhook] Redirigiendo llamada a celular PSTN ({ADVISOR_PHONE_NUMBER})")
-        else:
-            # CASO A: Enrutar al navegador (WebRTC Client)
-            dial.client("asesor_juan")
-            print("[Incoming Call Webhook] Redirigiendo llamada a cliente WebRTC (asesor_juan)")
+
+        # CASO 0: EL ASESOR LLAMA DESDE SU CELULAR (IVR / Centralita Saliente - Opción A)
+        if from_number == ADVISOR_PHONE_NUMBER:
+            print(f"[IVR Advisor] Asesor {from_number} llamó al número de acceso. Iniciando IVR...")
+            gather_url = f"{base_url}/ivr-dial"
+            gather = response.gather(
+                action=gather_url,
+                method="POST",
+                finish_on_key="#",
+                num_digits=15,
+                timeout=10
+            )
+            gather.say("Bienvenido al sistema de llamadas. Por favor, marque el número del cliente seguido de la tecla numeral.", language="es-MX")
             
-        response.append(dial)
-        return HTMLResponse(content=str(response), media_type="application/xml")
-        
+            response.say("No se recibió ninguna marcación. Fin de la llamada.", language="es-MX")
+            return HTMLResponse(content=str(response), media_type="application/xml")
+
+        # CASO 1: LLAMADA SALIENTE (Iniciada por el Asesor desde el navegador WebRTC)
+        elif from_number.startswith("client:"):
+            print(f"[Outbound WebRTC] Asesor {from_number} llamando al cliente: {to_number}")
+            
+            # Crear marcado con Caller ID enmascarado y grabación dual
+            dial = Dial(
+                caller_id=TWILIO_PHONE_NUMBER,
+                record="record-from-answer-dual",
+                recording_status_callback=recording_callback_url,
+                recording_status_callback_event="completed"
+            )
+            
+            # Si el destino es otra identidad WebRTC (client:x) o un número físico
+            if to_number.startswith("client:"):
+                dial.client(to_number.replace("client:", ""))
+            else:
+                dial.number(to_number)
+                
+            response.append(dial)
+            return HTMLResponse(content=str(response), media_type="application/xml")
+
+        # CASO 2: LLAMADA ENTRANTE (Llamada del cliente al número de Twilio)
+        else:
+            print(f"[Inbound Call] Cliente llama a nuestro número de Twilio. De: {from_number}")
+            response.say("Conectando su llamada con un asesor disponible. Esta conversación será grabada.", language="es-MX")
+            
+            dial = Dial(
+                record="record-from-answer-dual",
+                recording_status_callback=recording_callback_url,
+                recording_status_callback_event="completed"
+            )
+            
+            if routing.lower() == "pstn":
+                dial.number(ADVISOR_PHONE_NUMBER)
+                print(f"[Inbound Call] Redirigiendo llamada entrante a celular PSTN ({ADVISOR_PHONE_NUMBER})")
+            else:
+                dial.client("asesor_juan")
+                print("[Inbound Call] Redirigiendo llamada entrante a cliente WebRTC (asesor_juan)")
+                
+            response.append(dial)
+            return HTMLResponse(content=str(response), media_type="application/xml")
+
     except Exception as e:
         print(f"Error crítico en incoming-call: {str(e)}")
         err_response = VoiceResponse()
         err_response.say("Error interno de enrutamiento.", language="es-MX")
+        return HTMLResponse(content=str(err_response), media_type="application/xml")
+
+@app.api_route("/ivr-dial", methods=["GET", "POST"])
+async def ivr_dial(request: Request):
+    """
+    ENDPOINT DE MARCADO IVR (Centralita Saliente):
+    Recibe los dígitos DTMF ingresados por el asesor desde su celular y marca al cliente.
+    """
+    try:
+        if request.method == "POST":
+            form_data = await request.form()
+            digits = form_data.get("Digits")
+        else:
+            digits = request.query_params.get("Digits")
+            
+        print(f"[IVR Dial] Asesor solicitó marcar a los dígitos: {digits}")
+        
+        response = VoiceResponse()
+        if not digits:
+            response.say("No se recibió ningún número de teléfono. Fin de la llamada.", language="es-MX")
+            return HTMLResponse(content=str(response), media_type="application/xml")
+            
+        client_number = digits
+        # Limpieza de número: si marca con '00', se cambia por '+'
+        if client_number.startswith("00"):
+            client_number = "+" + client_number[2:]
+        # Si no empieza con '+', y tiene 10 dígitos (Colombia), asumimos '+57'
+        elif not client_number.startswith("+"):
+            if len(client_number) == 10:
+                client_number = f"+57{client_number}"
+            else:
+                client_number = f"+{client_number}"
+                
+        print(f"[IVR Dial] Conectando asesor con el número limpio: {client_number}")
+        response.say("Conectando con el cliente. Esta llamada será grabada.", language="es-MX")
+        
+        base_url = str(request.base_url).rstrip('/')
+        recording_callback_url = f"{base_url}/recording-status"
+        
+        # Realizar el puente (Dial) hacia el cliente
+        dial = Dial(
+            caller_id=TWILIO_PHONE_NUMBER,
+            record="record-from-answer-dual",
+            recording_status_callback=recording_callback_url,
+            recording_status_callback_event="completed"
+        )
+        dial.number(client_number)
+        response.append(dial)
+        
+        return HTMLResponse(content=str(response), media_type="application/xml")
+    except Exception as e:
+        print(f"Error crítico en ivr-dial: {str(e)}")
+        err_response = VoiceResponse()
+        err_response.say("Error interno al conectar la llamada.", language="es-MX")
+        return HTMLResponse(content=str(err_response), media_type="application/xml")
+
+@app.post("/call/click-to-call")
+async def click_to_call(request: Request):
+    """
+    ENDPOINT DE INICIO CLICK-TO-CALL:
+    Inicia una llamada saliente hacia el celular del asesor.
+    Al contestar el asesor, Twilio consulta el endpoint '/outbound-bridge' para conectar con el cliente.
+    """
+    try:
+        data = await request.json()
+        client_number = data.get("client_number")
+        
+        if not client_number:
+            return JSONResponse(status_code=400, content={"error": "Falta el parámetro client_number"})
+            
+        base_url = str(request.base_url).rstrip('/')
+        encoded_client_number = urllib.parse.quote(client_number)
+        
+        print(f"[Click-to-Call] Marcando al celular del asesor ({ADVISOR_PHONE_NUMBER}) para puentear con cliente ({client_number})...")
+        
+        # Iniciar llamada saliente al asesor
+        call = twilio_client.calls.create(
+            to=ADVISOR_PHONE_NUMBER,
+            from_=TWILIO_PHONE_NUMBER,
+            # Twilio consultará este webhook cuando el asesor conteste la llamada
+            url=f"{base_url}/outbound-bridge?To={encoded_client_number}"
+        )
+        
+        return {"status": "success", "call_sid": call.sid, "message": "Llamada al asesor iniciada"}
+    except Exception as e:
+        print(f"Error en Click-to-Call: {str(e)}")
+        return JSONResponse(status_code=500, content={"error": f"Error al iniciar Click-to-Call: {str(e)}"})
+
+@app.post("/outbound-bridge")
+async def outbound_bridge(request: Request, To: str):
+    """
+    WEBHOOK DE PUENTE CLICK-TO-CALL:
+    Se ejecuta cuando el asesor contesta en su celular.
+    Genera las instrucciones TwiML para marcar al cliente final y grabar la llamada.
+    """
+    try:
+        print(f"[Click-to-Call Bridge] Asesor contestó. Conectando con cliente final: {To}")
+        
+        base_url = str(request.base_url).rstrip('/')
+        recording_callback_url = f"{base_url}/recording-status"
+        
+        response = VoiceResponse()
+        response.say("Conectando con el cliente. Esta llamada será grabada.", language="es-MX")
+        
+        # Realizar el puente (Dial) hacia el número del cliente
+        dial = Dial(
+            caller_id=TWILIO_PHONE_NUMBER,
+            record="record-from-answer-dual",
+            recording_status_callback=recording_callback_url,
+            recording_status_callback_event="completed"
+        )
+        dial.number(To)
+        response.append(dial)
+        
+        return HTMLResponse(content=str(response), media_type="application/xml")
+    except Exception as e:
+        print(f"Error crítico en outbound-bridge: {str(e)}")
+        err_response = VoiceResponse()
+        err_response.say("Error al puentear la llamada.", language="es-MX")
         return HTMLResponse(content=str(err_response), media_type="application/xml")
 
 @app.post("/recording-status")

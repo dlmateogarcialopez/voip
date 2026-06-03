@@ -55,10 +55,12 @@
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--panel-border);
             border-radius: 24px;
-            padding: 35px;
+            padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             position: relative;
             z-index: 1;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .dashboard-container::before {
@@ -77,7 +79,7 @@
         /* Encabezado */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .header h1 {
@@ -101,12 +103,12 @@
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--panel-border);
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
+            padding: 18px;
+            margin-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 0px;
         }
 
         .form-group label {
@@ -171,6 +173,97 @@
             box-shadow: none;
             cursor: not-allowed;
             transform: none;
+            filter: none;
+        }
+
+        /* Panel de Marcado (Dialer) */
+        .dialer-panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .dialer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 220px;
+            margin: 15px auto;
+            justify-items: center;
+        }
+
+        .dial-key {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(30, 41, 59, 0.6);
+            color: var(--text-primary);
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dial-key:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+            transform: scale(1.08);
+        }
+
+        .dial-key:active {
+            transform: scale(0.95);
+        }
+
+        .dial-key.delete {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .dial-key.delete:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 12px var(--danger-glow);
+        }
+
+        .outbound-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .outbound-actions .btn {
+            flex: 1;
+            padding: 12px 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 10px;
+            gap: 5px;
+        }
+
+        .btn-webrtc-call {
+            background: var(--success);
+            box-shadow: 0 4px 12px var(--success-glow);
+        }
+
+        .btn-webrtc-call:hover {
+            box-shadow: 0 6px 16px var(--success-glow);
+        }
+
+        .btn-click-call {
+            background: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-click-call:hover {
+            box-shadow: 0 6px 16px var(--primary-glow);
         }
 
         /* Indicador de Estado del Dispositivo */
@@ -179,17 +272,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
         .status-dot {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background-color: var(--danger);
             box-shadow: 0 0 15px var(--danger-glow);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             animation: pulse-red 2s infinite;
         }
 
@@ -218,7 +311,7 @@
         }
 
         .status-text {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 600;
             letter-spacing: -0.2px;
             color: var(--text-primary);
@@ -233,22 +326,22 @@
         /* Animaciones del Status Dot */
         @keyframes pulse-red {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         @keyframes pulse-yellow {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
         @keyframes pulse-green {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         @keyframes pulse-blue {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
 
@@ -257,8 +350,8 @@
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 18px;
-            padding: 25px;
-            margin-bottom: 25px;
+            padding: 22px;
+            margin-bottom: 20px;
             display: none; /* Se activa dinámicamente */
             flex-direction: column;
             align-items: center;
@@ -272,17 +365,17 @@
 
         .timer {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 2.2rem;
+            font-size: 2.1rem;
             font-weight: 500;
             color: var(--text-primary);
             text-shadow: 0 0 10px rgba(255,255,255,0.1);
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .call-info {
             font-size: 0.9rem;
             color: var(--text-secondary);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         /* Visualizador de Ondas de Audio Simulado */
@@ -292,7 +385,7 @@
             justify-content: center;
             gap: 4px;
             height: 35px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .bar {
@@ -326,15 +419,15 @@
             background: var(--danger);
             box-shadow: 0 4px 14px var(--danger-glow);
             border-radius: 50%;
-            width: 54px;
-            height: 54px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             border: none;
             color: white;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
         }
 
         .btn-hangup:hover {
@@ -442,7 +535,7 @@
             border: 1px solid var(--panel-border);
             border-radius: 12px;
             padding: 15px;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .logs-title {
@@ -536,8 +629,44 @@
                     </button>
                 </div>
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: right;" id="host-info">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 5px;" id="host-info">
                 Conectando a: <span style="font-family: monospace; color: white;" id="host-domain">Localhost</span>
+            </div>
+        </div>
+
+        <!-- Panel de Marcado (Llamadas Salientes) -->
+        <div class="dialer-panel">
+            <div class="form-group">
+                <label for="dial-number">Número del Cliente (Llamadas Salientes)</label>
+                <input type="text" id="dial-number" value="" placeholder="Ej: +573123456789">
+            </div>
+
+            <!-- Teclado Visual -->
+            <div class="dialer-grid">
+                <button class="dial-key" data-val="1">1</button>
+                <button class="dial-key" data-val="2">2</button>
+                <button class="dial-key" data-val="3">3</button>
+                <button class="dial-key" data-val="4">4</button>
+                <button class="dial-key" data-val="5">5</button>
+                <button class="dial-key" data-val="6">6</button>
+                <button class="dial-key" data-val="7">7</button>
+                <button class="dial-key" data-val="8">8</button>
+                <button class="dial-key" data-val="9">9</button>
+                <button class="dial-key" data-val="*">*</button>
+                <button class="dial-key" data-val="0">0</button>
+                <button class="dial-key" data-val="#">#</button>
+                <button class="dial-key" data-val="+">+</button>
+                <button class="dial-key" data-val="delete" class="dial-key delete" style="grid-column: span 2; width: 100px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.25);">Borrar</button>
+            </div>
+
+            <!-- Acciones de Salida -->
+            <div class="outbound-actions">
+                <button class="btn btn-webrtc-call" id="btn-call-webrtc" disabled>
+                    <span>💻 Llamar desde PC</span>
+                </button>
+                <button class="btn btn-click-call" id="btn-call-click">
+                    <span>📱 Llamar a Celular</span>
+                </button>
             </div>
         </div>
 
@@ -545,7 +674,7 @@
         <div class="status-badge-container">
             <div class="status-dot offline" id="status-dot"></div>
             <div class="status-text" id="status-text">Desconectado</div>
-            <div class="status-subtext" id="status-subtext">Registra el teléfono para recibir llamadas</div>
+            <div class="status-subtext" id="status-subtext">Registra el teléfono para realizar o recibir llamadas</div>
         </div>
 
         <!-- Panel de Llamada Activa (Slide-In) -->
@@ -563,7 +692,6 @@
             <div class="timer" id="call-timer">00:00</div>
             <div class="controls">
                 <button class="btn-hangup" id="btn-hangup" title="Colgar llamada">
-                    <!-- Icono Teléfono Colgando en Unicode -->
                     📞
                 </button>
             </div>
@@ -611,6 +739,12 @@
         const statusSubtext = document.getElementById('status-subtext');
         const hostDomain = document.getElementById('host-domain');
         
+        // Dialer elements
+        const dialNumberInput = document.getElementById('dial-number');
+        const btnCallWebrtc = document.getElementById('btn-call-webrtc');
+        const btnCallClick = document.getElementById('btn-call-click');
+        const dialKeys = document.querySelectorAll('.dial-key');
+        
         const activeCallPanel = document.getElementById('active-call-panel');
         const activeCallInfo = document.getElementById('active-call-info');
         const callTimer = document.getElementById('call-timer');
@@ -647,6 +781,19 @@
             logsContent.innerHTML = `<div class="log-entry"><span class="log-time">[Sistema]</span> Historial limpiado.</div>`;
         });
 
+        // Configuración de teclas visuales del marcador
+        dialKeys.forEach(key => {
+            key.addEventListener('click', () => {
+                const val = key.getAttribute('data-val');
+                playBeep(450, 0.08); // Pequeño tono de marcado al pulsar
+                if (val === 'delete') {
+                    dialNumberInput.value = dialNumberInput.value.slice(0, -1);
+                } else {
+                    dialNumberInput.value += val;
+                }
+            });
+        });
+
         // Genera tonos de llamada realistas en el navegador sin archivos externos
         function startRingtone() {
             try {
@@ -659,7 +806,6 @@
                         audioCtx.resume();
                     }
                     
-                    // Doble tono telefónico estándar (440Hz y 480Hz combinados)
                     const osc1 = audioCtx.createOscillator();
                     const osc2 = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
@@ -670,7 +816,6 @@
                     osc2.type = 'sine';
                     osc2.frequency.value = 480;
                     
-                    // Rampa de volumen para evitar clics de audio
                     gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
                     gainNode.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.1);
                     gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime + 1.8);
@@ -688,7 +833,7 @@
                 };
                 
                 playRing();
-                ringtoneInterval = setInterval(playRing, 6000); // Repetir patrón cada 6 segundos
+                ringtoneInterval = setInterval(playRing, 6000); 
                 log("Reproduciendo ringtone sintetizado.", "Audio");
             } catch (e) {
                 console.error("Error al reproducir audio:", e);
@@ -743,7 +888,6 @@
 
             try {
                 log(`Solicitando Access Token para la identidad "${identity}"...`, 'Backend');
-                // Obtener el Token desde nuestro backend FastAPI
                 const response = await fetch(`/token/${identity}`);
                 if (!response.ok) {
                     throw new Error(`Código HTTP: ${response.status}`);
@@ -755,8 +899,6 @@
                 }
 
                 log("Token obtenido con éxito. Inicializando Twilio.Device...", 'Backend');
-                
-                // Inicializar Twilio Device
                 initializeTwilioDevice(data.token, identity);
 
             } catch (err) {
@@ -764,26 +906,21 @@
                 updateStatus('offline', 'Error de Conexión', err.message);
                 btnRegister.disabled = false;
                 btnText.textContent = "Registrar Teléfono";
+                btnCallWebrtc.disabled = true;
             }
         });
 
         function initializeTwilioDevice(token, identity) {
-            // Destruir dispositivo previo si existía
             if (twilioDevice) {
                 twilioDevice.destroy();
             }
 
-            // Crear el dispositivo usando el constructor global del Voice SDK
-            // En v2.x, se pasa el token y un objeto de configuración
             twilioDevice = new Twilio.Device(token, {
                 logLevel: 1,
                 codecPreferences: ['opus', 'pcmu']
             });
 
-            // Registrar listeners de eventos de Twilio
             setupDeviceEventListeners(identity);
-
-            // Registrarse formalmente con Twilio para recibir llamadas entrantes
             twilioDevice.register();
         }
 
@@ -793,6 +930,7 @@
                 updateStatus('online', 'En línea / Registrado', `Esperando llamadas para "${identity}"`);
                 btnRegister.disabled = false;
                 btnText.textContent = "Actualizar Registro";
+                btnCallWebrtc.disabled = false; // Habilitar llamada desde PC
                 playBeep(800, 0.15);
             });
 
@@ -801,6 +939,7 @@
                 updateStatus('offline', 'Desconectado', 'Registra el teléfono para recibir llamadas');
                 btnRegister.disabled = false;
                 btnText.textContent = "Registrar Teléfono";
+                btnCallWebrtc.disabled = true;
             });
 
             twilioDevice.on('error', (twilioError) => {
@@ -808,24 +947,21 @@
                 updateStatus('offline', 'Error de Twilio', twilioError.message);
                 btnRegister.disabled = false;
                 btnText.textContent = "Registrar Teléfono";
+                btnCallWebrtc.disabled = true;
             });
 
             // Manejo de llamada entrante
             twilioDevice.on('incoming', (call) => {
-                log(`Llamada entrante detectada. Parámetros: ${JSON.stringify(call.parameters)}`, 'Twilio');
+                log(`Llamada entrante detectada. De: ${call.parameters.From || 'Cliente Anónimo'}`, 'Twilio');
                 
                 activeCall = call;
-                
-                // Mostrar número del llamante (o 'Cliente Anónimo' si no hay From)
                 const fromNumber = call.parameters.From || 'Cliente Anónimo';
                 incomingCallerNumber.textContent = fromNumber;
                 
-                // Activar overlay de llamada entrante y reproducir ringtone
                 incomingOverlay.classList.add('active');
                 startRingtone();
                 updateStatus('registering', 'Llamada Entrante', `Llamando de ${fromNumber}`);
 
-                // Vincular eventos a la llamada específica
                 setupCallEventListeners();
             });
         }
@@ -834,53 +970,129 @@
             if (!activeCall) return;
 
             activeCall.on('accept', () => {
-                log("Llamada aceptada y canal de audio abierto.", 'Llamada');
+                log("Llamada establecida y canal de audio abierto.", 'Llamada');
                 stopRingtone();
                 incomingOverlay.classList.remove('active');
                 
-                // Activar el panel de llamada activa y timer
                 activeCallPanel.classList.add('active');
-                updateStatus('active-call', 'En Llamada', 'Grabación estéreo iniciada');
+                updateStatus('active-call', 'En Llamada', 'Conversación activa - Grabación iniciada');
                 
                 startTimer();
                 playBeep(600, 0.2);
             });
 
             activeCall.on('disconnect', () => {
-                log("Llamada finalizada por el usuario o cliente.", 'Llamada');
+                log("Llamada finalizada.", 'Llamada');
                 handleCallCleanup();
             });
 
             activeCall.on('cancel', () => {
-                log("Llamada cancelada por el cliente antes de contestar.", 'Llamada');
+                log("Llamada cancelada antes de contestar.", 'Llamada');
                 handleCallCleanup();
             });
 
             activeCall.on('reject', () => {
-                log("Llamada rechazada por el asesor.", 'Llamada');
+                log("Llamada rechazada.", 'Llamada');
                 handleCallCleanup();
             });
         }
 
-        // --- ACCIONES DE LLAMADA ---
+        // --- ACCIONES DE LLAMADA ENTRANTE ---
         btnAcceptCall.addEventListener('click', () => {
             if (activeCall) {
-                log("Asesor presionó Aceptar. Abriendo micrófono...", 'Interfaz');
+                log("Asesor aceptó llamada entrante.", 'Interfaz');
                 activeCall.accept();
             }
         });
 
         btnRejectCall.addEventListener('click', () => {
             if (activeCall) {
-                log("Asesor presionó Rechazar.", 'Interfaz');
+                log("Asesor rechazó llamada entrante.", 'Interfaz');
                 activeCall.reject();
             }
         });
 
         btnHangup.addEventListener('click', () => {
             if (activeCall) {
-                log("Asesor colgó la llamada activa.", 'Interfaz');
+                log("Colgando llamada activa...", 'Interfaz');
                 activeCall.disconnect();
+            }
+        });
+
+        // --- ACCIONES DE LLAMADAS SALIENTES (OUTBOUND) ---
+        
+        // 1. Llamar desde el navegador (WebRTC)
+        btnCallWebrtc.addEventListener('click', async () => {
+            const clientNumber = dialNumberInput.value.trim();
+            if (!clientNumber) {
+                alert("Por favor introduce un número de teléfono destino.");
+                return;
+            }
+            if (!twilioDevice || twilioDevice.state !== 'registered') {
+                alert("El dispositivo debe estar registrado y en línea.");
+                return;
+            }
+
+            log(`Marcando desde PC a: ${clientNumber}...`, 'WebRTC Outbound');
+            playBeep(600, 0.15);
+
+            try {
+                // Iniciar llamada saliente usando el SDK de Twilio
+                const call = await twilioDevice.connect({
+                    params: { To: clientNumber }
+                });
+
+                activeCall = call;
+
+                // Cambiar estado a marcando y activar panel
+                activeCallPanel.classList.add('active');
+                activeCallInfo.textContent = `Marcando a: ${clientNumber}`;
+                updateStatus('active-call', 'Marcando...', 'Esperando respuesta del cliente...');
+
+                setupCallEventListeners();
+            } catch (err) {
+                log(`Error al marcar llamada saliente: ${err.message}`, 'WebRTC Outbound');
+                handleCallCleanup();
+            }
+        });
+
+        // 2. Llamar a mi celular (Click-to-Call / Bridging)
+        btnCallClick.addEventListener('click', async () => {
+            const clientNumber = dialNumberInput.value.trim();
+            if (!clientNumber) {
+                alert("Por favor introduce un número de teléfono destino.");
+                return;
+            }
+
+            btnCallClick.disabled = true;
+            const originalText = btnCallClick.innerHTML;
+            btnCallClick.innerHTML = "<span>Marcando...</span>";
+            log(`Iniciando Click-to-Call. Solicitando puente hacia: ${clientNumber}...`, 'Click-to-Call');
+
+            try {
+                // Petición al backend FastAPI
+                const response = await fetch('/call/click-to-call', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ client_number: clientNumber })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Código HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                log(`[Click-to-Call] Solicitud exitosa. Tu celular registrado sonará pronto. Contesta para iniciar puente con ${clientNumber}.`, 'Click-to-Call');
+                playBeep(700, 0.2);
+            } catch (err) {
+                log(`Error al iniciar Click-to-Call: ${err.message}`, 'Error');
+            } finally {
+                btnCallClick.disabled = false;
+                btnCallClick.innerHTML = originalText;
             }
         });
 
@@ -891,12 +1103,11 @@
             incomingOverlay.classList.remove('active');
             activeCallPanel.classList.remove('active');
             
-            // Regresar al estado online
             const identity = advisorIdInput.value.trim();
             updateStatus('online', 'En línea / Registrado', `Esperando llamadas para "${identity}"`);
             
             activeCall = null;
-            playBeep(300, 0.4); // Tono de colgado
+            playBeep(300, 0.4); 
         }
 
         // --- SISTEMAS DE INTERFAZ Y TIMER ---
